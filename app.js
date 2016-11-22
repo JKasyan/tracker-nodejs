@@ -8,11 +8,13 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 var config = require('./config');
 var jwt    = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
 var MONGODB_URI = process.env.MONGODB_URI;
 //
 var app = express();
 //
 var PointModel = require('./models/point').PointModel;
+var User = require('./models/user').UserModel;
 mongoose.connect(MONGODB_URI);
 //
 app.use(logger('dev'));
@@ -26,7 +28,9 @@ app.get('/', function (req, res) {
     res.sendFile('index.html', {root: __dirname + '/public/views'});
 });
 
-app.get('/api/points/from=:from/to=:to', function (request, response) {
+var apiRoutes = express.Router();
+
+apiRoutes.get('/points/from=:from/to=:to', function (request, response) {
     var from = parseInt(request.params.from) / 1000;
     var to = parseInt(request.params.to) / 1000;
     console.log('from = ', from, ', to = ', to);
@@ -38,15 +42,15 @@ app.get('/api/points/from=:from/to=:to', function (request, response) {
         function (err, points) {
             if (err) {
                 response.statusCode = 500;
-                return response.send({error: 'Server error'});
+                response.send({error: 'Server error'});
             } else {
                 console.log(points.length);
-                return response.json(points);
+                response.json(points);
             }
         });
 });
 
-app.get('/api/points/quantity=:quantity', function (request, response) {
+apiRoutes.get('/points/quantity=:quantity', function (request, response) {
     var q = parseInt(request.params.quantity);
     PointModel.find(
         {},
@@ -58,10 +62,32 @@ app.get('/api/points/quantity=:quantity', function (request, response) {
             }
         },
         function (error, points) {
-            return response.json(points);
+            response.json(points);
         }
     );
 });
+
+apiRoutes.post('/authenticate', function(request, respone) {
+    var email = request.body.email;
+    var pass = request.body.password;
+    console.log(email, ' ', pass);
+    User.findOne({email: email}, function(error, user) {
+        if (error) throw error;
+        if(!user) {
+            respone.json({success:false, message:'Authentication failed'})
+        } else {
+            console.log('password hash = ', user);
+            user.comparePassword('')
+            /*bcrypt.compare(pass, user.firstName, function(err, result) {
+                if (err) throw err;
+                console.log('result = ', result);
+                respone.json(result);
+            });*/
+        }
+    });
+});
+
+app.use('/api', apiRoutes);
 
 app.listen(1337, function () {
     console.log('Express server listening on port 1337!')
