@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="mainApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Main page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+</head>
+<body ng-controller="greetingController as grCtrl">
+
+<script>
+    angular.module('mainApp', ['services']).controller('greetingController', ['pointsService', function (pointsService) {
+        console.log(pointsService);
+        pointsService.getPointsByDate(new Date(2016, 10, 20).getTime(), new Date().getTime()).then(function (response) {
+            console.log(response.data[0]);
+            console.log(response.data.length);
+        });
+        pointsService.lastPoint().then(function (response) {
+            console.log(response.data);
+        });
+        var self = this;
+        self.text = 'Hello!';
+        self.getPointsByDate = function (from, to) {
+            console.log(pointsService.getPointsByDate(from, to));
+        }
+    }]);
+</script>
+<script src="js/services.js"></script>
+</body>
+</html>
