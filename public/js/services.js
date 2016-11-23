@@ -10,6 +10,17 @@ services.factory('pointsService', ['$http', function ($http) {
         },
         lastPoint: function () {
             return $http.get('/api/points/quantity=1');
+        },
+        auth: function(email, pass) {
+            return $http({
+                method: 'POST',
+                url: '/api/authenticate',
+                params: {
+                    email: email,
+                    password: pass
+                },
+                headers : {'Content-Type': 'application/json '}
+            });
         }
     }
 }]);

@@ -67,22 +67,23 @@ apiRoutes.get('/points/quantity=:quantity', function (request, response) {
     );
 });
 
-apiRoutes.post('/authenticate', function(request, respone) {
-    var email = request.body.email;
-    var pass = request.body.password;
-    console.log(email, ' ', pass);
+apiRoutes.post('/authenticate', function(request, response) {
+    var email = request.query.email;
+    var pass = request.query.password;
+    console.log('email = ', email, ', pass = ', pass);
     User.findOne({email: email}, function(error, user) {
         if (error) throw error;
         if(!user) {
-            respone.json({success:false, message:'Authentication failed'})
+            response.json({success:false, message:'Authentication failed'})
         } else {
-            console.log('password hash = ', user);
-            user.comparePassword('')
+            console.log('password hash = ', user.password);
+            //user.comparePassword('')
             /*bcrypt.compare(pass, user.firstName, function(err, result) {
                 if (err) throw err;
                 console.log('result = ', result);
                 respone.json(result);
             });*/
+            response.json({message:'ok'});
         }
     });
 });

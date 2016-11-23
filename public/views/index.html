@@ -18,10 +18,11 @@
             console.log(response.data);
         });
         var self = this;
-        self.text = 'Hello!';
+        /*self.text = 'Hello!';
         self.getPointsByDate = function (from, to) {
             console.log(pointsService.getPointsByDate(from, to));
-        }
+        }*/
+        pointsService.auth('j.kasyan86@gmail.com', '12345');
     }]);
 </script>
 <script src="js/services.js"></script>
