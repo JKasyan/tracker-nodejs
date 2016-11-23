@@ -30,6 +30,22 @@ app.get('/', function (req, res) {
 
 var apiRoutes = express.Router();
 
+apiRoutes.use(function(request, response, next) {
+    var token = request.body.token || request.query.token || request.headers['x-access-control'];
+    if(token) {
+        jwt.verify(token, app.get('superSecretKey'), function(err, decoded) {
+            if(err) {
+                return response.json({success: false, message: 'Failed to authenticate token'});
+            }
+            request.decoded = decoded;
+            console.log('decoded = ', decoded);
+            next();
+        })
+    } else {
+        return response.status(403).send({success: false, message: 'Not authorized'});
+    }
+});
+
 apiRoutes.get('/points/from=:from/to=:to', function (request, response) {
     var from = parseInt(request.params.from) / 1000;
     var to = parseInt(request.params.to) / 1000;
@@ -67,23 +83,26 @@ apiRoutes.get('/points/quantity=:quantity', function (request, response) {
     );
 });
 
-apiRoutes.post('/authenticate', function(request, response) {
-    var email = request.query.email;
-    var pass = request.query.password;
+app.post('/authenticate', function(request, response) {
+    var email = request.body.email;
+    var pass = request.body.password;
     console.log('email = ', email, ', pass = ', pass);
     User.findOne({email: email}, function(error, user) {
         if (error) throw error;
         if(!user) {
             response.json({success:false, message:'Authentication failed'})
         } else {
-            console.log('password hash = ', user.password);
-            //user.comparePassword('')
-            /*bcrypt.compare(pass, user.firstName, function(err, result) {
-                if (err) throw err;
-                console.log('result = ', result);
-                respone.json(result);
-            });*/
-            response.json({message:'ok'});
+            console.log('user = ', user);
+            user.comparePassword(pass, function(err, isMatch) {
+                if(err) throw err;
+                console.log('isMatch = ', isMatch);
+                if(isMatch) {
+                    var token = jwt.sign(user.email, app.get('superSecretKey'));
+                    response.json({success: true, token: token, message:'Success'});
+                } else {
+                    response.json({success: false, message:'Incorrect password'});
+                }
+            });
         }
     });
 });
