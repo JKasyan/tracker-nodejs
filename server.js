@@ -8,7 +8,12 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 var config = require('./config');
 var jwt    = require('jsonwebtoken');
-var bcrypt = require('bcrypt');
+var moment = require('moment');
+var redis = require('redis');
+var redisPort = process.env.REDIS_PORT;
+var redisHost = process.env.REDIS_HOST;
+var pass = process.env.REDIS_PASS;
+var clientRedis = redis.createClient(redisPort, redisHost);
 var MONGODB_URI = process.env.MONGODB_URI;
 //
 var app = express();
@@ -16,6 +21,10 @@ var app = express();
 var PointModel = require('./models/point').PointModel;
 var User = require('./models/user').UserModel;
 mongoose.connect(MONGODB_URI);
+clientRedis.auth(pass, function(err) {
+    if (err) throw err;
+    console.log('Success connected to redis!');
+});
 //
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -30,21 +39,34 @@ app.get('/', function (req, res) {
 
 var apiRoutes = express.Router();
 
-apiRoutes.use(function(request, response, next) {
+/*apiRoutes.use(function (request, response, next) {
     var token = request.body.token || request.query.token || request.headers['x-access-control'];
-    if(token) {
-        jwt.verify(token, app.get('superSecretKey'), function(err, decoded) {
-            if(err) {
+    if (token) {
+        jwt.verify(token, app.get('superSecretKey'), function (err, decoded) {
+            if (err) {
                 return response.json({success: false, message: 'Failed to authenticate token'});
             }
-            request.decoded = decoded;
             console.log('decoded = ', decoded);
-            next();
-        })
+            clientRedis.hgetall(decoded.email, function (err, userAuthData) {
+                if (err) throw err;
+                console.log('user auth data = ', userAuthData);
+                var now = moment();
+                if (userAuthData
+                    && userAuthData.password
+                    && userAuthData.password == decoded.password
+                    && userAuthData.expired
+                    && userAuthData.expired > now) {
+                    request.decoded = decoded;
+                    next();
+                } else {
+                    return response.status(403).json({success: false, message: 'Not authorized'});
+                }
+            });
+        });
     } else {
         return response.status(403).send({success: false, message: 'Not authorized'});
     }
-});
+});*/
 
 apiRoutes.get('/points/from=:from/to=:to', function (request, response) {
     var from = parseInt(request.params.from) / 1000;
@@ -66,7 +88,7 @@ apiRoutes.get('/points/from=:from/to=:to', function (request, response) {
         });
 });
 
-apiRoutes.get('/points/quantity=:quantity', function (request, response) {
+apiRoutes.get('/points/q=:quantity', function (request, response) {
     var q = parseInt(request.params.quantity);
     PointModel.find(
         {},
@@ -97,8 +119,31 @@ app.post('/authenticate', function(request, response) {
                 if(err) throw err;
                 console.log('isMatch = ', isMatch);
                 if(isMatch) {
-                    var token = jwt.sign(user.email, app.get('superSecretKey'));
-                    response.json({success: true, token: token, message:'Success'});
+                    var expired = moment().add(60, 'minutes').valueOf();
+                    var expression = {
+                        email: user.email,
+                        password: user.password,
+                        expired: expired
+                    }
+                    var token = jwt.sign(expression, app.get('superSecretKey'));
+                    var authData = [user.email];
+                    for(var key in expression) {
+                        authData.push(key);
+                        authData.push(expression[key]);
+                    }
+                    clientRedis.hmset(authData, function(err, result) {
+                        if(err) throw err;
+                        console.log('Saved auth data in redis: ', result);
+                        response.json(
+                            {
+                                success: true,
+                                token: token,
+                                message:'Success authentication',
+                                expired: expired,
+                                roles: user.roles
+                            }
+                        );
+                    });
                 } else {
                     response.json({success: false, message:'Incorrect password'});
                 }
