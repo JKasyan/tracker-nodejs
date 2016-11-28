@@ -5,16 +5,33 @@
     <title>Sandbox</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 </head>
-<body ng-controller="ctrlOne">
-<h1>{{test}}</h1>
-<input ng-model="test">
+<body>
+<div ng-controller="ctrlOne">
+    <h1>{{test}}</h1>
+    <input ng-model="test" ng-disabled="checkbox">
+    <input type="checkbox" ng-model="checkbox">
+
+</div>
+<div ng-controller="ctrlTwo">
+    <h1>$event</h1>
+    {{$event}}
+    <input type="submit" ng-click="clickMe($event)">
+</div>
 <script>
     angular.module('sandbox', []).controller('ctrlOne', function ($scope, $log) {
         $scope.test = 1;
+        $scope.checkbox = true;
         $scope.$watch('test', function (newVal, oldVal) {
             $log.debug(newVal, ' ', oldVal);
         }, true);
-    });
+        $scope.$watch('checkbox', function (newVal, oldVal) {
+            $log.debug('checkbox = ', newVal, ' ', oldVal);
+        }, true);
+    }).controller('ctrlTwo', function($scope, $log) {
+        $scope.clickMe = function(event) {
+            $log.debug(event);
+        }
+    })
 </script>
 </body>
 </html>
