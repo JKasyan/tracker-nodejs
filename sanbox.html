@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html ng-app="sandbox">
+<head>
+    <meta charset="UTF-8">
+    <title>Sandbox</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+</head>
+<body ng-controller="ctrlOne">
+<h1>{{test}}</h1>
+<input ng-model="test">
+<script>
+    angular.module('sandbox', []).controller('ctrlOne', function ($scope, $log) {
+        $scope.test = 1;
+        $scope.$watch('test', function (newVal, oldVal) {
+            $log.debug(newVal, ' ', oldVal);
+        }, true);
+    });
+</script>
+</body>
+</html>
