@@ -1,8 +1,8 @@
 /**
  * Created by kasyan on 11/25/16.
  */
-angular.module('mainApp', ['services'])
-    .controller('pointsController', ['$log', '$scope', 'pointsService','$interval', function ($log, $scope, pointsService, $interval) {
+angular.module('trackerApp', ['services'])
+    .controller('pointsController', ['$log', '$scope', 'pointsService',function ($log, $scope, pointsService) {
         $log.debug(Object.keys($scope));
         pointsService.lastPoint().then(function (response) {
             $log.debug('response data =', response.data);

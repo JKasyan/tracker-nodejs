@@ -6,32 +6,151 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 </head>
 <body>
-<div ng-controller="ctrlOne">
-    <h1>{{test}}</h1>
+<div ng-controller="ctrlOne" class="theme">
+    <h1>{{test|json}}</h1>
     <input ng-model="test" ng-disabled="checkbox">
     <input type="checkbox" ng-model="checkbox">
 
 </div>
-<div ng-controller="ctrlTwo">
+<div ng-controller="ctrlTwo" class="theme">
     <h1>$event</h1>
     {{$event}}
     <input type="submit" ng-click="clickMe($event)">
 </div>
+
+<div ng-controller="filterCtrl" class="theme">
+    <h1>Filter</h1>
+    <div>
+        <input ng-model="text"><br>
+        <span ng-bind="text|reverse"></span><br>
+        <span ng-bind="text|reverse:true"></span><br>
+    </div>
+</div>
+
+
+<div ng-controller="formCtrl" class="theme">
+    <h2>Form</h2>
+    <form novalidate class="css-form" name="user_form">
+        <label>Name: <input type="text" ng-model="user.name" name="uName" required=""></label>
+        <div ng-show="user_form.$submitted || user_form.uName.$touched">
+            <div class="error" ng-show="user_form.uName.$error.required">Name is required!</div>
+        </div>
+        <label>Email: <input type="email" ng-model="user.email" name="email" required></label>
+        <div ng-show="user_form.$submitted || user_form.email.$touched">
+            <div class="error" ng-show="user_form.email.$error.required">Email is required!</div>
+        </div>
+        <input type="submit" ng-click="addUser(user)">
+    </form>
+    <pre ng-repeat="user in users track by $index">{{user|json}}</pre>
+
+    <h2>Update triggers</h2>
+    <div>
+        <label>blur: <input type="text" ng-model="data" ng-model-options="{updateOn: 'blur'}"></label>
+        <label>default: <input type="text" ng-model="data" ng-model-options="{updateOn: 'default', debounce: 500}"></label>
+        <span ng-bind="data"></span>
+    </div>
+    <h2>Custom validation</h2>
+    <div>
+        <form name="my_form" novalidate>
+            <label>Digit 0-10 <input ng-model="digit" integer min="0" max="10" name="size"></label>
+            <span ng-show="my_form.my_form.$error.size">The value is not a valid integer!</span>
+        </form>
+    </div>
+</div>
+<style type="text/css">
+    .theme {
+        padding: 0 20px 20px 20px;
+        border: 1px solid #FA787E;
+        border-radius: 10px;
+        margin: 10px;
+    }
+    .css-form input.ng-invalid.ng-touched {
+        border-color: #FA787E;
+    }
+
+    .css-form input.ng-valid.ng-touched {
+        border-color: #78FA89;
+    }
+
+    .error {
+        color: red;
+    }
+</style>
 <script>
-    angular.module('sandbox', []).controller('ctrlOne', function ($scope, $log) {
-        $scope.test = 1;
-        $scope.checkbox = true;
-        $scope.$watch('test', function (newVal, oldVal) {
-            $log.debug(newVal, ' ', oldVal);
-        }, true);
-        $scope.$watch('checkbox', function (newVal, oldVal) {
-            $log.debug('checkbox = ', newVal, ' ', oldVal);
-        }, true);
-    }).controller('ctrlTwo', function($scope, $log) {
-        $scope.clickMe = function(event) {
-            $log.debug(event);
-        }
-    })
+    angular.module('sandbox', [])
+
+            .controller('ctrlOne', function ($scope, $log) {
+                $scope.test = 1;
+                $scope.checkbox = true;
+                $scope.$watch('test', function (newVal, oldVal) {
+                    $log.debug(newVal, ' ', oldVal);
+                }, true);
+                $scope.$watch('checkbox', function (newVal, oldVal) {
+                    $log.debug('checkbox = ', newVal, ' ', oldVal);
+                }, true);
+            })
+
+            .controller('ctrlTwo', function ($scope, $log) {
+                $scope.clickMe = function (event) {
+                    $log.debug(event);
+                }
+            })
+
+            .controller('filterCtrl', function ($scope) {
+                $scope.text = 'hello';
+
+            })
+
+            .filter('reverse', function () {
+                return function (input, upperCase) {
+                    input = input || '';
+                    var out = '';
+                    for (var i = 0; i < input.length; i++) {
+                        out = input.charAt(i) + out;
+                    }
+                    if (upperCase) {
+                        out = out.toUpperCase();
+                    }
+                    return out;
+                }
+            })
+
+            .controller('formCtrl', function ($scope, $log) {
+                $log.debug($scope);
+                $scope.user = {
+                    name: 'Evgen',
+                    email: 'evgen@gmail.com'
+                }
+                $scope.show = null;
+                $scope.users = [];
+                $scope.addUser = function (user) {
+                    $log.debug(user);
+                    $scope.users.push(angular.copy(user));
+                }
+                //
+                $scope.$watch('data', function (newData, oldData) {
+                    $log.debug(newData, ' -> ', oldData);
+                });
+                /**
+                 *
+                 */
+                $scope.digit = 7;
+            })
+    
+            .directive('integer', function () {
+                return {
+                    required: 'ngModel',
+                    link:function (scope, elm, attributes, ctrl) {
+                        console.log(ctrl);
+                        ctrl.$validators.integer = function (modelValue, viewValue) {
+                            if(ctrl.$isEmpty(modelValue)) {
+                                return true;
+                            }
+                            return /^\-?\d+$/.test(modelValue);
+                        }
+                    }
+                }
+            })
 </script>
 </body>
 </html>
