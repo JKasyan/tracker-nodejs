@@ -1,19 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="mainApp">
+<html lang="en" ng-app="trackerApp">
 <head>
     <meta charset="UTF-8">
     <title>Main page</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0ZoCNEDPN29SW8f2D8jCmQBAx0nBgB-c&"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <link rel="stylesheet" href="styles/reset.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/gadgets.css">
 </head>
-<body ng-controller="pointsController as pointsCtrl">
-<h1 id="title">{{point.lat}}, {{point.lng}}</h1>
-<img ng-click="changeUrl()" ng-src="{{url}}" />
-<input ng-model="car">
-<button ng-click="addCar()">Add</button>
-<button ng-click="remove()">Remove</button>
-<ul ng-repeat="car in cars track by $index">
-    <li>{{car}}</li>
-</ul>
+<body>
+<div class="header">
+    <div class="links_header left_links_header">
+        <ul>
+            <li><a id="find_by_date" class="buttons_header buttons_header_selected" href="#">Find by date</a></li>
+            <li><a id="gadgets" class="buttons_header" href="#">Gadgets</a></li>
+            <li><a id="tracks" class="buttons_header" href="#">Tracks</a></li>
+        </ul>
+    </div>
+    <div class="links_header right_links_header">
+        <ul>
+            <li><a class="buttons_header" href="#">Log in</a></li>
+            <li><a class="buttons_header" id="logout_link" href="#">Log out</a></li>
+        </ul>
+    </div>
+</div>
+
+<div id="map"></div>
+<div class="sidebar"></div>
+
 <script src="js/app.js"></script>
 <script src="js/services.js"></script>
 </body>
