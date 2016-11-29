@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Main page</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0ZoCNEDPN29SW8f2D8jCmQBAx0nBgB-c&"></script>
+    <script src="js/lodash.core.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <script src="js/angular-google-maps.js"></script>
+    <script src="js/angular-simple-logger.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0ZoCNEDPN29SW8f2D8jCmQBAx0nBgB-c&"></script>
     <link rel="stylesheet" href="styles/reset.css">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/gadgets.css">
+    <style>
+        .angular-google-map-container { height: 400px; }
+    </style>
 </head>
 <body>
 <div class="header">
@@ -26,7 +32,9 @@
     </div>
 </div>
 
-<div id="map"></div>
+<div id="map" ng-controller="mapController">
+    <ui-gmap-google-map center='map.center' zoom='map.zoom'></ui-gmap-google-map>
+</div>
 <div class="sidebar"></div>
 
 <script src="js/app.js"></script>

@@ -1,7 +1,13 @@
 /**
  * Created by kasyan on 11/25/16.
  */
-var app = angular.module('trackerApp', ['services'])
+var app = angular.module('trackerApp', ['services', 'uiGmapgoogle-maps'])
+
+    .config(['uiGmapGoogleMapApiProvider', function(GoogleMapApiProviders) {
+        GoogleMapApiProviders.configure({
+            china: true
+        });
+    }])
 
     .controller('trackByDateController', ['$log', '$scope', 'mapService', function ($log, $scope, mapService) {
         $log.debug('trackByDateController');
@@ -15,15 +21,17 @@ var app = angular.module('trackerApp', ['services'])
 
     .controller('mapController', mapController);
 
-function mapController($scope, $log, pointsService, mapService) {
+function mapController($scope, $log, mapService) {
     $log.debug('mapController');
     $scope.addDigit = function(digit) {
         mapService.add(angular.copy(digit));
     }
     $scope.data = mapService.all();
+    //
+    $scope.map = { center: { latitude: 45, longitude: -73 }, zoom: 8 };
 }
 
-mapController.$inject = ['$scope', '$log', 'pointsService', 'mapService'];
+mapController.$inject = ['$scope', '$log', 'mapService'];
 
 app.factory('mapService', function() {
     var data = [1,2,3];
