@@ -10,10 +10,10 @@ var config = require('./config');
 var jwt    = require('jsonwebtoken');
 var moment = require('moment');
 var redis = require('redis');
-var redisPort = process.env.REDIS_PORT;
-var redisHost = process.env.REDIS_HOST;
+//var redisPort = process.env.REDIS_PORT;
+//var redisHost = process.env.REDIS_HOST;
 var pass = process.env.REDIS_PASS;
-var clientRedis = redis.createClient(redisPort, redisHost);
+//var clientRedis = redis.createClient(redisPort, redisHost);
 var MONGODB_URI = process.env.MONGODB_URI;
 //
 var app = express();
@@ -21,10 +21,10 @@ var app = express();
 var PointModel = require('./models/point').PointModel;
 var User = require('./models/user').UserModel;
 mongoose.connect(MONGODB_URI);
-clientRedis.auth(pass, function(err) {
+/*clientRedis.auth(pass, function(err) {
     if (err) throw err;
     console.log('Success connected to redis!');
-});
+});*/
 //
 app.use(logger('dev'));
 app.use(bodyParser.json());
