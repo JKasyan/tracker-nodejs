@@ -1,6 +1,7 @@
 /**
  *
  */
+var port = process.env.PORT || 9000;
 var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
@@ -154,6 +155,6 @@ app.post('/authenticate', function(request, response) {
 
 app.use('/api', apiRoutes);
 
-app.listen(1337, function () {
-    console.log('Express server listening on port 1337!')
+app.listen(port, function () {
+    console.log('Express server listening on port  = ' + port + '!')
 });
