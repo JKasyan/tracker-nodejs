@@ -49,13 +49,18 @@
         <label>default: <input type="text" ng-model="data" ng-model-options="{updateOn: 'default', debounce: 500}"></label>
         <span ng-bind="data"></span>
     </div>
-    <h2>Custom validation</h2>
+    <!--<h2>Custom validation</h2>
     <div>
         <form name="my_form" novalidate>
             <label>Digit 0-10 <input ng-model="digit" integer min="0" max="10" name="size"></label>
             <span ng-show="my_form.my_form.$error.size">The value is not a valid integer!</span>
         </form>
-    </div>
+    </div>-->
+</div>
+
+<div class="theme" ng-controller="directivesCtrl">
+    <h1>Directives</h1>
+    <div my-customer type="A"></div>
 </div>
 <style type="text/css">
     .theme {
@@ -137,18 +142,20 @@
                 $scope.digit = 7;
             })
     
-            .directive('integer', function () {
+            .directive('myCustomer', function ($log) {
                 return {
-                    required: 'ngModel',
-                    link:function (scope, elm, attributes, ctrl) {
-                        console.log(ctrl);
-                        ctrl.$validators.integer = function (modelValue, viewValue) {
-                            if(ctrl.$isEmpty(modelValue)) {
-                                return true;
-                            }
-                            return /^\-?\d+$/.test(modelValue);
-                        }
-                    }
+                    templateUrl: function (elem, attr) {
+                        $log.debug('type = ', attr.type);
+                        return 'my_customer.html';
+                    },
+                    restrict: 'A'
+                }
+            })
+
+            .controller('directivesCtrl', function ($log, $scope) {
+                $scope.customer = {
+                    name: 'John',
+                    age: 30
                 }
             })
 </script>
