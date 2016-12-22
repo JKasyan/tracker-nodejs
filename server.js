@@ -107,7 +107,10 @@ apiRoutes.get('/points/q=:quantity', function (request, response) {
 });
 
 apiRoutes.get('/users', function (request, response) {
-    User.find({}, function (error, users) {
+    User.find(
+        {enabled: true},
+        {firstName: 1, secondName: 1, email: 1},
+        function (error, users) {
         if(error) throw new Error;
         response.json(users);
     })
